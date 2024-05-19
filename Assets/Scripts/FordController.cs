@@ -200,7 +200,7 @@ public class FordInteractionState : BaseState<FordController.FordStates>
         {
             Items item = interactables[0].GetComponent<Items>();
             item.Interacted();
-            if (!fordController.items.Contains(item))
+            if (!fordController.items.Contains(item) && item.isCollectable())
             {
                 fordController.items.Add(item);
                 InventoryManager.Inventory.AddRange(fordController.items);

@@ -32,4 +32,9 @@ public class Kasa : MonoBehaviour, Items
         yield return new WaitForSeconds(4);
         text.text = "";
     }
+
+    public bool isCollectable()
+    {
+        throw new System.NotImplementedException();
+    }
 }

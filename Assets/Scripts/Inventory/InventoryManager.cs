@@ -10,11 +10,11 @@ public class InventoryManager : MonoBehaviour
     Inputs inputs;
     private void Awake()
     {
+        Inventory.Clear();
         if (instance == null)
         {
             instance = this;
             inputs = new Inputs();
-            DontDestroyOnLoad(gameObject);
             Debug.Log("InventoryManager instance initialized.");
         }
         else if (instance != this)

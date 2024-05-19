@@ -150,7 +150,7 @@ public class PlayerInteractionState : BaseState<PlayerController.PlayerState>
         {
             Items item = interactables[0].GetComponent<Items>();
             item.Interacted();
-            if (!playerController.items.Contains(item))
+            if (!playerController.items.Contains(item) && item.isCollectable())
             {
                 playerController.items.Add(item);
                 InventoryManager.Inventory.AddRange(playerController.items);

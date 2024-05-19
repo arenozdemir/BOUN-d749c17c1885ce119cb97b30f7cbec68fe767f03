@@ -11,6 +11,10 @@ public class Item1 : MonoBehaviour, Items
     {
         sprite = itemScriptableObject.GetImage();
     }
+    public bool isCollectable()
+    {
+        return true;
+    }
     public void Interacted()
     {
         gameObject.SetActive(false);
