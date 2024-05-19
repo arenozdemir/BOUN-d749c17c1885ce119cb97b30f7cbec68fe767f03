@@ -113,7 +113,7 @@ public class FordStunState : BaseState<FordController.FordStates>
     }
     public override void EnterState()
     {
-        
+        fordController.animator.SetBool("isWalking", false);
     }
     public override void ExitState()
     {
@@ -146,7 +146,7 @@ public class FordWalkState : BaseState<FordController.FordStates>
     public override void UpdateState()
     {
         fordController.transform.position += new Vector3(movementVector.x, 0, movementVector.y) * Time.deltaTime * 2f;
-        fordController.transform.rotation = Quaternion.Lerp(fordController.transform.rotation, Quaternion.LookRotation(new Vector3(movementVector.x, 0, movementVector.y)), Time.deltaTime * 2f);
+        fordController.transform.rotation = Quaternion.Lerp(fordController.transform.rotation, Quaternion.LookRotation(new Vector3(movementVector.x, 0, movementVector.y)), Time.deltaTime * 10f);
     }
     public override FordController.FordStates GetNextState()
     {
@@ -164,7 +164,7 @@ public class FordIdleSate : BaseState<FordController.FordStates>
 
     public override void EnterState()
     {
-        fordController.animator.SetBool("isWalking", true);
+        fordController.animator.SetBool("isWalking", false);
         fordController.canMove = true;
     }
 
@@ -203,19 +203,14 @@ public class FordInteractionState : BaseState<FordController.FordStates>
             if (!fordController.items.Contains(item))
             {
                 fordController.items.Add(item);
-                
+                InventoryManager.Inventory.AddRange(fordController.items);
+                fordController.canvasManager.UpdateCanvas(InventoryManager.Inventory);
             }
         }
-
-        //InventoryManager.instance.UpdateInventory(fordController.items);
-
-        if (fordController.canvasManager != null)
+        else if (interactables.Length == 0)
         {
-            fordController.canvasManager.UpdateCanvas(fordController.items);
-        }
-        else
-        {
-            Debug.LogError("CanvasManager not found in the scene!");
+            Items item = InventoryManager.instance.GetActiveItem();
+            item.Interacted();
         }
     }
 

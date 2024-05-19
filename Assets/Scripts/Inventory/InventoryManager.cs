@@ -6,13 +6,14 @@ public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager instance;
     private int activeNumber;
-    public List<Items> playerInventory = new List<Items>();
-    public List<Items> FordInventory = new List<Items>();
+    public static List<Items> Inventory = new List<Items>(6);
+    Inputs inputs;
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
+            inputs = new Inputs();
             DontDestroyOnLoad(gameObject);
             Debug.Log("InventoryManager instance initialized.");
         }
@@ -22,18 +23,8 @@ public class InventoryManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+        inputs.InventoryActions.Newaction.started += ItemNumber;
     }
-
-    //public void SetInventory(List<Items> items)
-    //{
-    //    inventoryItems = new List<Items>(items);
-    //}
-
-    //public void UpdateInventory(List<Items> items)
-    //{
-    //    inventoryItems = new List<Items>(items);
-    //}
-
     public void ItemNumber(InputAction.CallbackContext ctx)
     {
         switch (ctx.ReadValue<float>())
@@ -60,9 +51,8 @@ public class InventoryManager : MonoBehaviour
                 break;
         }
     }
-
-    public Items GetActiveItem(List<Items> items)
+    public Items GetActiveItem()
     {
-        return items.Count > activeNumber ? items[activeNumber] : null;
+        return Inventory.Count > activeNumber ? Inventory[activeNumber] : null;
     }
 }

@@ -1,6 +1,5 @@
 using Cinemachine;
 using System.Collections.Generic;
-using System.Transactions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,7 +15,7 @@ public class PlayerController : StateManager<PlayerController.PlayerState>
         Stun
     }
     public LayerMask interactableLayer;
-    public List<Items> items = new List<Items>();
+    public List<Items> items;
     public Animator animator;
     public Items activeItem;
     public CanvasManager canvasManager;
@@ -26,6 +25,7 @@ public class PlayerController : StateManager<PlayerController.PlayerState>
     private void Start()
     {
         animator = GetComponent<Animator>();
+        items = new List<Items>();
 
         states.Add(PlayerState.Interaction, new PlayerInteractionState(PlayerState.Interaction, this));
         states.Add(PlayerState.Idle, new PlayerIdleSate(PlayerState.Idle, this));
@@ -118,7 +118,7 @@ public class PlayerStunState : BaseState<PlayerController.PlayerState>
 
     public override void EnterState()
     {
-        
+        playerController.animator.SetBool("isWalking", false);
     }
 
     public override void ExitState()
@@ -150,25 +150,19 @@ public class PlayerInteractionState : BaseState<PlayerController.PlayerState>
         {
             Items item = interactables[0].GetComponent<Items>();
             item.Interacted();
-            //if (!playerController.items.Contains(item))
-            //{
-            //    playerController.items.Add(item);
-            //}
             if (!playerController.items.Contains(item))
             {
                 playerController.items.Add(item);
+                InventoryManager.Inventory.AddRange(playerController.items);
+                playerController.canvasManager.UpdateCanvas(InventoryManager.Inventory);
             }
         }
-        //InventoryManager.instance.UpdateInventory(playerController.items);
+        else if (interactables.Length == 0)
+        {
+            Items item = InventoryManager.instance.GetActiveItem();
+            item.Interacted();
+        }
         
-        if (playerController.canvasManager != null)
-        {
-            playerController.canvasManager.UpdateCanvas(playerController.items);
-        }
-        else
-        {
-            Debug.LogError("CanvasManager not found in the scene!");
-        }
     }
 
     public override void ExitState()
@@ -232,7 +226,7 @@ public class PlayerWalkState : BaseState<PlayerController.PlayerState>
     }
     public override void UpdateState()
     {
-        playerController.transform.position += new Vector3(movementVector.x, 0, movementVector.y) * Time.deltaTime * 1.5f;
+        playerController.transform.position += new Vector3(movementVector.x, 0, movementVector.y) * Time.deltaTime * 1.2f;
         playerController.transform.rotation = Quaternion.Lerp(playerController.transform.rotation, Quaternion.LookRotation(new Vector3(movementVector.x, 0, movementVector.y)), Time.deltaTime * 5f);
     }
     public override PlayerController.PlayerState GetNextState()

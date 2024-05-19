@@ -13,7 +13,7 @@ public class Item1 : MonoBehaviour, Items
     }
     public void Interacted()
     {
-        StartCoroutine(ShowDescription());
+        gameObject.SetActive(false);
     }
     public Sprite GetImage()
     {
