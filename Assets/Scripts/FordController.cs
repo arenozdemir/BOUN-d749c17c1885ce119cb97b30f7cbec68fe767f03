@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine;
 using static UnityEditor.Progress;
+using Cinemachine;
 
 public class FordController : StateManager<FordController.FordStates>
 {
@@ -11,38 +12,45 @@ public class FordController : StateManager<FordController.FordStates>
         Walk,
         Run,
         Interaction,
-        Change
+        Change,
+        Stun
     }
+    
     public LayerMask interactableLayer;
-    public static Transform fordTransform;
     public List<Items> items = new List<Items>();
     public Items activeItem;
     public CanvasManager canvasManager;
-
+    public bool canMove;
+    public CinemachineVirtualCamera virtualCamera;
+    public Animator animator;
+    
     private void Start()
     {
-        fordTransform = transform;
-
+        animator = GetComponent<Animator>();
+        
         states.Add(FordStates.Interaction, new FordInteractionState(FordStates.Interaction, this));
         states.Add(FordStates.Idle, new FordIdleSate(FordStates.Idle, this));
         states.Add(FordStates.Walk, new FordWalkState(FordStates.Walk, this));
         states.Add(FordStates.Change, new FordChangeState(FordStates.Change, this));
+        states.Add(FordStates.Stun, new FordStunState(FordStates.Stun, this));
 
         inputs.PlayerActions.Interactions.started += Interaction;
         inputs.PlayerActions.Movement.started += Movement;
         inputs.PlayerActions.Movement.canceled += Movement;
         inputs.PlayerActions.Change.started += ChangePlayer;
 
-        currentState = states[FordStates.Idle];
+        currentState = states[FordStates.Stun];
     }
 
     public void Interaction(InputAction.CallbackContext ctx)
     {
+        if (currentState == states[FordStates.Stun]) return;
         TransitionToState(FordStates.Interaction);
     }
 
     public void Movement(InputAction.CallbackContext ctx)
     {
+        if (currentState == states[FordStates.Stun]) return;
         Vector2 movement = ctx.ReadValue<Vector2>();
         if (Mathf.Abs(movement.normalized.magnitude) > 0.1)
         {
@@ -56,30 +64,17 @@ public class FordController : StateManager<FordController.FordStates>
 
     public void ChangePlayer(InputAction.CallbackContext ctx)
     {
+        if (currentState == states[FordStates.Stun]) return;
         TransitionToState(FordStates.Change);
     }
 
     private void OnEnable()
     {
-        //items = InventoryManager.instance.FordInventory;
         inputs.Enable();
-        canvasManager = FindObjectOfType<CanvasManager>();
-        string identifier = gameObject.name; // Use character's name as identifier
-        Debug.Log("Loading inventory for " + identifier); // Add debug log
-        if (fordTransform != null && SaveSystem.HasSavedPosition("Ford", identifier))
-        {
-            fordTransform.position = SaveSystem.LoadPosition("Ford", identifier);
-            //SaveSystem.LoadInventory("Player", identifier);
-            SaveSystem.LoadInventory("Ford", identifier);
-        }
     }
 
     private void OnDisable()
     {
-        string identifier = gameObject.name; // Use character's name as identifier
-        Debug.Log("Saving inventory for " + identifier); // Add debug log
-        SaveSystem.SavePosition(fordTransform.position, "Ford", identifier);
-        SaveSystem.SaveInventory(items, "Ford", identifier);
         inputs.Disable();
     }
 }
@@ -93,13 +88,40 @@ public class FordChangeState : BaseState<FordController.FordStates>
     }
     public override void EnterState()
     {
-        SceneLoader.instance.ChangeScene();
+        PlayerController.switchedPlayer = false;
+        fordController.virtualCamera.gameObject.SetActive(false);
+        fordController.TransitionToState(FordController.FordStates.Stun);
     }
     public override void ExitState()
     {
     }
     public override void UpdateState()
     {
+        if(PlayerController.switchedPlayer) fordController.TransitionToState(FordController.FordStates.Idle);
+    }
+    public override FordController.FordStates GetNextState()
+    {
+        return FordController.FordStates.Idle;
+    }
+}
+public class FordStunState : BaseState<FordController.FordStates>
+{
+    private FordController fordController;
+    public FordStunState(FordController.FordStates state, FordController controller) : base(state)
+    {
+        fordController = controller;
+    }
+    public override void EnterState()
+    {
+        
+    }
+    public override void ExitState()
+    {
+        
+    }
+    public override void UpdateState()
+    {
+        if (PlayerController.switchedPlayer) fordController.TransitionToState(FordController.FordStates.Idle);
     }
     public override FordController.FordStates GetNextState()
     {
@@ -115,7 +137,7 @@ public class FordWalkState : BaseState<FordController.FordStates>
     }
     public override void EnterState()
     {
-        
+        fordController.animator.SetBool("isWalking", true);
     }
     public override void ExitState()
     {
@@ -142,7 +164,8 @@ public class FordIdleSate : BaseState<FordController.FordStates>
 
     public override void EnterState()
     {
-        
+        fordController.animator.SetBool("isWalking", true);
+        fordController.canMove = true;
     }
 
     public override void ExitState()
@@ -177,13 +200,10 @@ public class FordInteractionState : BaseState<FordController.FordStates>
         {
             Items item = interactables[0].GetComponent<Items>();
             item.Interacted();
-            //if (!fordController.items.Contains(item))
-            //{
-            //    fordController.items.Add(item);
-            //}
             if (!fordController.items.Contains(item))
             {
                 fordController.items.Add(item);
+                
             }
         }
 

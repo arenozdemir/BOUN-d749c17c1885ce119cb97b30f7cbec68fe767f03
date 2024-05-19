@@ -1,4 +1,6 @@
+using Cinemachine;
 using System.Collections.Generic;
+using System.Transactions;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,23 +12,26 @@ public class PlayerController : StateManager<PlayerController.PlayerState>
         Idle,
         Walk,
         Interaction,
-        Change
+        Change,
+        Stun
     }
     public LayerMask interactableLayer;
-    public static Transform playerTransform;
     public List<Items> items = new List<Items>();
     public Animator animator;
     public Items activeItem;
     public CanvasManager canvasManager;
+    public static bool switchedPlayer;
+    
+    public CinemachineVirtualCamera virtualCamera;
     private void Start()
     {
         animator = GetComponent<Animator>();
-        playerTransform = transform;
 
         states.Add(PlayerState.Interaction, new PlayerInteractionState(PlayerState.Interaction, this));
         states.Add(PlayerState.Idle, new PlayerIdleSate(PlayerState.Idle, this));
         states.Add(PlayerState.Walk, new PlayerWalkState(PlayerState.Walk, this));
         states.Add(PlayerState.Change, new PlayerChangeState(PlayerState.Change, this));
+        states.Add(PlayerState.Stun, new PlayerStunState(PlayerState.Stun, this));
 
         inputs.PlayerActions.Interactions.started += Interaction;
         inputs.PlayerActions.Movement.started += Movement;
@@ -38,12 +43,14 @@ public class PlayerController : StateManager<PlayerController.PlayerState>
 
     private void Interaction(InputAction.CallbackContext ctx)
     {
+        if (currentState == states[PlayerState.Stun]) return;
         TransitionToState(PlayerState.Interaction);
     }
 
     private void Movement(InputAction.CallbackContext ctx)
     {
         Vector2 movement = ctx.ReadValue<Vector2>();
+        if (currentState == states[PlayerState.Stun]) return;
         if (Mathf.Abs(movement.normalized.magnitude) > 0.1)
         {
             TransitionToState(PlayerState.Walk);
@@ -56,29 +63,16 @@ public class PlayerController : StateManager<PlayerController.PlayerState>
 
     private void ChangePlayer(InputAction.CallbackContext ctx)
     {
+        if (currentState == states[PlayerState.Stun]) return;
         TransitionToState(PlayerState.Change);
     }
     private void OnEnable()
     {
-        //items = InventoryManager.instance.playerInventory;
         inputs.Enable();
-        canvasManager = FindObjectOfType<CanvasManager>();
-        string identifier = gameObject.name; // Use character's name as identifier
-        Debug.Log("Loading inventory for " + identifier); // Add debug log
-        if (playerTransform != null && SaveSystem.HasSavedPosition("Player", identifier))
-        {
-            playerTransform.position = SaveSystem.LoadPosition("Player", identifier);
-            //SaveSystem.LoadInventory("Player", identifier);
-            SaveSystem.LoadInventory("Player", identifier);
-        }
     }
 
     private void OnDisable()
     {
-        string identifier = gameObject.name;
-        Debug.Log("Saving inventory for " + identifier);
-        SaveSystem.SavePosition(playerTransform.position, "Player", identifier);
-        SaveSystem.SaveInventory(items, "Player", identifier);
         inputs.Disable();
     }
 }
@@ -93,15 +87,38 @@ public class PlayerChangeState : BaseState<PlayerController.PlayerState>
 
     public override void EnterState()
     {
-        //if (playerController.canvasManager != null)
-        //{
-        //    playerController.canvasManager.UpdateCanvas(PlayerController.items);
-        //}
-        //else
-        //{
-        //    Debug.LogError("CanvasManager not found in the scene!");
-        //}
-        SceneLoader.instance.ChangeScene();
+        playerController.virtualCamera.gameObject.SetActive(true);
+        PlayerController.switchedPlayer = true;
+        playerController.TransitionToState(PlayerController.PlayerState.Stun);
+    }
+
+    public override void ExitState()
+    {
+        Debug.Log("Change state exit");
+    }
+
+    public override PlayerController.PlayerState GetNextState()
+    {
+        return PlayerController.PlayerState.Stun;
+    }
+
+    public override void UpdateState()
+    {
+        
+    }
+}
+public class PlayerStunState : BaseState<PlayerController.PlayerState>
+{
+    private PlayerController playerController;
+
+    public PlayerStunState(PlayerController.PlayerState state, PlayerController playerController) : base(state)
+    {
+        this.playerController = playerController;
+    }
+
+    public override void EnterState()
+    {
+        
     }
 
     public override void ExitState()
@@ -116,10 +133,9 @@ public class PlayerChangeState : BaseState<PlayerController.PlayerState>
 
     public override void UpdateState()
     {
-        // Update logic if needed
+        if (!PlayerController.switchedPlayer) playerController.TransitionToState(PlayerController.PlayerState.Idle);
     }
 }
-
 public class PlayerInteractionState : BaseState<PlayerController.PlayerState>
 {
     PlayerController playerController;
