@@ -60,8 +60,8 @@ public class SceneLoader : MonoBehaviour
             {
                 playerController.transform.position = SaveSystem.LoadPosition("Player", identifier);
             }
-            PlayerController.items = SaveSystem.LoadInventory("Player", identifier);
-            playerController.canvasManager.UpdateCanvas(PlayerController.items);
+            playerController.items = SaveSystem.LoadInventory("Player", identifier);
+            playerController.canvasManager.UpdateCanvas(playerController.items);
         }
 
         FordController fordController = FindObjectOfType<FordController>();
@@ -75,8 +75,8 @@ public class SceneLoader : MonoBehaviour
             {
                 fordController.transform.position = SaveSystem.LoadPosition("Ford", identifier);
             }
-            FordController.items = SaveSystem.LoadInventory("Ford", identifier);
-            fordController.canvasManager.UpdateCanvas(FordController.items);
+            fordController.items = SaveSystem.LoadInventory("Ford", identifier);
+            fordController.canvasManager.UpdateCanvas(fordController.items);
         }
     }
 }

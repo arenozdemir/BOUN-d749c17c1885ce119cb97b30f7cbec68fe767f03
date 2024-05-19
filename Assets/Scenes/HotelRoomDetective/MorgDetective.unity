@@ -391,6 +391,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemScriptableObject: {fileID: 11400000, guid: c92c4bc66bfd5e640ade139d7e465714,
     type: 2}
+  descriptionText: {fileID: 0}
 --- !u!65 &1087989791
 BoxCollider:
   m_ObjectHideFlags: 0

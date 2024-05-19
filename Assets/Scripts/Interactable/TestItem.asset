@@ -14,3 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemSprite: {fileID: 21300000, guid: 4727e33cd22085443b4f6e5c76e45fe3, type: 3}
   audio: {fileID: 0}
+  description: "Bu anahtar\u0131 hat\u0131rl\u0131yorum. San\u0131r\u0131m otel odamdaki
+    kasay\u0131 a\xE7\u0131yor..."

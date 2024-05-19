@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class FordController : StateManager<FordController.FordStates>
 {
@@ -14,14 +15,14 @@ public class FordController : StateManager<FordController.FordStates>
     }
     public LayerMask interactableLayer;
     public static Transform fordTransform;
-    public static List<Items> items = new List<Items>();
+    public List<Items> items = new List<Items>();
     public Items activeItem;
     public CanvasManager canvasManager;
 
     private void Start()
     {
         fordTransform = transform;
-        
+
         states.Add(FordStates.Interaction, new FordInteractionState(FordStates.Interaction, this));
         states.Add(FordStates.Idle, new FordIdleSate(FordStates.Idle, this));
         states.Add(FordStates.Walk, new FordWalkState(FordStates.Walk, this));
@@ -180,9 +181,9 @@ public class FordInteractionState : BaseState<FordController.FordStates>
             //{
             //    fordController.items.Add(item);
             //}
-            if (!FordController.items.Contains(item))
+            if (!fordController.items.Contains(item))
             {
-                FordController.items.Add(item);
+                fordController.items.Add(item);
             }
         }
 
@@ -190,7 +191,7 @@ public class FordInteractionState : BaseState<FordController.FordStates>
 
         if (fordController.canvasManager != null)
         {
-            fordController.canvasManager.UpdateCanvas(FordController.items);
+            fordController.canvasManager.UpdateCanvas(fordController.items);
         }
         else
         {

@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemSprite: {fileID: 0}
   audio: {fileID: 0}
-  description: 
+  description: "\u0130\xE7inden eski g\xFCnl\xFC\u011F\xFCm \xE7\u0131kt\u0131. \xC7ocukluk
+    hat\u0131ralar\u0131m"

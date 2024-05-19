@@ -14,11 +14,10 @@ public class PlayerController : StateManager<PlayerController.PlayerState>
     }
     public LayerMask interactableLayer;
     public static Transform playerTransform;
-    public static List<Items> items = new List<Items>();
+    public List<Items> items = new List<Items>();
     public Animator animator;
     public Items activeItem;
     public CanvasManager canvasManager;
-
     private void Start()
     {
         animator = GetComponent<Animator>();
@@ -139,16 +138,16 @@ public class PlayerInteractionState : BaseState<PlayerController.PlayerState>
             //{
             //    playerController.items.Add(item);
             //}
-            if (!PlayerController.items.Contains(item))
+            if (!playerController.items.Contains(item))
             {
-                PlayerController.items.Add(item);
+                playerController.items.Add(item);
             }
         }
         //InventoryManager.instance.UpdateInventory(playerController.items);
         
         if (playerController.canvasManager != null)
         {
-            playerController.canvasManager.UpdateCanvas(PlayerController.items);
+            playerController.canvasManager.UpdateCanvas(playerController.items);
         }
         else
         {

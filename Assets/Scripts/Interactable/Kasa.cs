@@ -17,10 +17,10 @@ public class Kasa : MonoBehaviour, Items
     }
     public void Interacted()
     {
-        if (FordController.items.Contains(item))
-        {
-            StartCoroutine(ShowDescription());
-        }
+        //if (fordController.items.Contains(item))
+        //{
+        //    StartCoroutine(ShowDescription());
+        //}
     }
     public Sprite GetImage()
     {
