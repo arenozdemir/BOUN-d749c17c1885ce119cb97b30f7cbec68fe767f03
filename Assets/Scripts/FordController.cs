@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine;
-using static UnityEditor.Progress;
 using Cinemachine;
 
 public class FordController : StateManager<FordController.FordStates>

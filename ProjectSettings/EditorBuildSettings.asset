@@ -6,12 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
     path: Assets/Scenes/HotelRoomDetective/MorgDetective.unity
     guid: c702428996d344f4c811c6d4e979f932
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/HotelRoomFord.unity
     guid: e9b72a6d1537ac74f85d641ff5943d31
   m_configObjects: {}
